@@ -4,16 +4,13 @@
 
 import * as $0 from "./routes/index.tsx";
 import * as $1 from "./routes/slack/interactive-endpoint.ts";
-import * as $$0 from "./islands/Counter.tsx";
 
 const manifest = {
   routes: {
     "./routes/index.tsx": $0,
     "./routes/slack/interactive-endpoint.ts": $1,
   },
-  islands: {
-    "./islands/Counter.tsx": $$0,
-  },
+  islands: {},
   baseUrl: import.meta.url,
 };
 
