@@ -45,6 +45,11 @@ export interface Container {
     is_ephemeral: boolean;
 }
 
+export interface Metadata {
+    event_type: string;
+    event_payload: any;
+}
+
 export interface Message {
     bot_id: string;
     type: string;
@@ -54,6 +59,7 @@ export interface Message {
     app_id: string;
     team: string;
     blocks: Block[];
+    metadata: Metadata;
 }
 
 export interface Block {

@@ -1,7 +1,10 @@
 import { HandlerContext } from "$fresh/server.ts";
 import { GitHub } from "../../communication/github.ts";
 import { SlackRequest } from "../../communication/slack-types.ts";
+import moment from "https://deno.land/x/momentjs@2.29.1-deno/mod.ts";
 
+const owner = 'austenstone';
+const repo = 'pooled-notif-test';
 const token = Deno.env.get("GITHUB_TOKEN");
 if (!token) {
   Deno.exit(1);
@@ -16,18 +19,32 @@ const getReqData = async (req: Request) => {
 
 export const handler = async (_req: Request, _ctx: HandlerContext): Promise<Response> => {
   const data: SlackRequest = await getReqData(_req);
-  const issueNumber = parseInt(data.message.text.slice(data.message.text.indexOf('#') + 1))
-  if (isNaN(issueNumber)) throw new Error('Invalid issue number');
-  try {
-    await client.issueUpdateAssignees('github', 'solutions-engineering', issueNumber, [data.user.username]);
-  } catch (e) {
+  console.debug('<- slack', data);
+
+  const payload = data.message.metadata.event_payload;
+  const issueNumber = parseInt(payload.number);
+  const issueTitle = payload.title.replace(/\+/g, ' ');
+  const htmlUrl = payload.html_url;
+
+  if (isNaN(issueNumber)) throw new Error('Invalid issue number: ' + data.message.text);
+
+  client.issueUpdateAssignees(owner, repo, issueNumber, [data.user.username]).then(async (rsp) => {
+    const rspData = await rsp.json();
+    const createdAt = new Date(rspData.created_at);
+    const updatedAt = new Date(rspData.updated_at);
+    const duration = Math.abs(updatedAt - createdAt);
+    const durationStr = moment.duration(duration).humanize();
+    fetch(data.response_url, {
+      method: 'POST',
+      body: JSON.stringify({
+        "replace_original": "true",
+        text: `Pooled issue <${htmlUrl}|${issueTitle} #${issueNumber}> assigned to <https://github.com/${data.user.username}|@${data.user.username}> ${durationStr} after creation.`
+      }),
+      headers: { "Content-Type": "application/json" }
+    }).then((rsp) => console.debug('<- github', rsp));
+  }).catch((e) => {
     throw new Error(e.message ? e.message : JSON.stringify(e));
-  }
-  return new Response(JSON.stringify({
-    "text": "Thanks for your request, we'll process it and get back to you."
-  }), {
-    headers: {
-      "Content-Type": "application/json"
-    }
   });
+
+  return new Response(null);
 };
