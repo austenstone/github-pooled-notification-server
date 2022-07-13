@@ -9,26 +9,29 @@ export class GitHub {
   constructor() {
   }
 
-  request(method: string, url: string, body?: any, init?: RequestInit) {
+  _request(method: string, url: string, body?: any, init?: RequestInit) {
     return fetch(GH_API_URL + url, {
       method,
       body: JSON.stringify(body),
       headers: {
-        "Authorization": `token ${this.token}`,
-        "Accept": "application/vnd.github+json"
+        'Authorization': `token ${this.token}`,
+        'Accept': "application/vnd.github+json",
+        ...init?.headers
       },
       ...init
     });
   }
 
+  request(method: string, url: string, body?: any, init?: RequestInit) {
+    return this._request(method, url, body, {
+      headers: { 'Authorization': `token ${this.token}` },
+      ...init
+    });
+  }
+
   bearerRequest(method: string, url: string, body?: any, init?: RequestInit) {
-    return fetch(GH_API_URL + url, {
-      method,
-      body: JSON.stringify(body),
-      headers: {
-        "Authorization": `Bearer ${this.jwt}`,
-        "Accept": "application/vnd.github+json"
-      },
+    return this._request(method, url, body, {
+      headers: { 'Authorization': `Bearer ${this.jwt}` },
       ...init
     });
   }
@@ -39,13 +42,18 @@ export class GitHub {
     });
   }
 
-  async initialize(appId: string) {
+  async initialize(appId: string, repoOwnerId: string) {
     await this.createJwt(appId);
-  
+
     const installationsRsp = await this.getInstallations();
-    const installations = await installationsRsp.json();
-    await this.setInstallationId(installations.find(i => i).id);
-    await this.getAccessToken();
+    if (installationsRsp.ok) {
+      const installations = await installationsRsp.json();
+      const foundInstall = installations.find((i) => i.target_id === repoOwnerId);
+      if (foundInstall) {
+        await this.setInstallationId(foundInstall.id);
+        await this.getAccessToken();
+      }
+    }
   }
 
   getInstallationRepositories() {
@@ -93,7 +101,10 @@ export class GitHub {
     const key = await crypto.subtle.importKey(
       "pkcs8",
       binaryDer,
-      { name: "RSASSA-PKCS1-v1_5", hash: { name: "SHA-256" } },
+      {
+        name: "RSASSA-PKCS1-v1_5",
+        hash: "SHA-256"
+      },
       true,
       ["sign"]
     );

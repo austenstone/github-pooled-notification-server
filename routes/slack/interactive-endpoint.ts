@@ -18,24 +18,27 @@ export const handler = async (_req: Request, _ctx: HandlerContext): Promise<Resp
   const htmlUrl = payload.html_url;
   const repoName = payload.repo_name;
   const repoOwner = payload.repo_owner;
+  const repoOwnerId = payload.repository_owner_id;
 
   const client = new GitHub();
-  await client.initialize(appId);
+  await client.initialize(appId, repoOwnerId);
 
   client.issueUpdateAssignees(repoOwner, repoName, issueNumber, [data.user.username]).then(async (rsp) => {
+    if (!rsp.ok) throw new Error(rsp.statusText);
     const rspData = await rsp.json();
+    console.log('<- github', rspData);
     const createdAt = new Date(rspData.created_at);
     const updatedAt = new Date(rspData.updated_at);
     const duration = Math.abs(updatedAt - createdAt);
     const durationStr = moment.duration(duration).humanize();
-    fetch(data.response_url, {
-      method: 'POST',
-      body: JSON.stringify({
-        "replace_original": "true",
-        text: `Pooled issue <${htmlUrl}|${issueTitle} #${issueNumber}> assigned to <https://github.com/${data.user.username}|@${data.user.username}> ${durationStr} after creation.`
-      }),
-      headers: { "Content-Type": "application/json" }
-    }).then(async (rsp) => console.debug('<- slack', await rsp.json()));
+    // fetch(data.response_url, {
+    //   method: 'POST',
+    //   body: JSON.stringify({
+    //     "replace_original": "true",
+    //     text: `Pooled issue <${htmlUrl}|#${issueNumber} ${issueTitle}> assigned to <https://github.com/${data.user.username}|@${data.user.username}> ${durationStr} after creation.`
+    //   }),
+    //   headers: { "Content-Type": "application/json" }
+    // }).then(async (rsp) => console.debug('<- slack', await rsp.json()));
   }).catch((e) => {
     throw new Error(e.message ? e.message : JSON.stringify(e));
   });
