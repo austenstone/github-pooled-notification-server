@@ -1,18 +1,3 @@
-# fresh project
-
-### Usage
-
-Start the project:
-
-```
-deno task start
-```
-
-This will watch the project directory and restart as necessary.
-
-### Example GitHub Actions workflow
-
-```yml
 # This is a workflow to send a simple slack notification when issue has a pooled label added to it. 
 # It is managed and owned by the corp-amer-se team. Specifically @logan-porelle
 
@@ -80,5 +65,3 @@ jobs:
         env:
           SLACK_BOT_TOKEN: '${{ secrets.SLACK_POOLED_NOTIF_TOKEN }}'
           CHANNEL_ID: 'C03GW7Y6YKE'
-
-```          
