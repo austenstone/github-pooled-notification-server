@@ -78,7 +78,7 @@ jobs:
               }
             }
         env:
-          SLACK_BOT_TOKEN: '${{ secrets.SLACK_POOLED_NOTIF_TOKEN }}'
+          SLACK_BOT_TOKEN: '${{ secrets.SLACK_BOT_TOKEN }}'
           CHANNEL_ID: '${{ secrets.CHANNEL_ID }}'
 
 ```          
