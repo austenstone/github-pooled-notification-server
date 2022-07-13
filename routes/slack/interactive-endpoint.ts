@@ -31,14 +31,14 @@ export const handler = async (_req: Request, _ctx: HandlerContext): Promise<Resp
     const updatedAt = new Date(rspData.updated_at);
     const duration = Math.abs(updatedAt - createdAt);
     const durationStr = moment.duration(duration).humanize();
-    // fetch(data.response_url, {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //     "replace_original": "true",
-    //     text: `Pooled issue <${htmlUrl}|#${issueNumber} ${issueTitle}> assigned to <https://github.com/${data.user.username}|@${data.user.username}> ${durationStr} after creation.`
-    //   }),
-    //   headers: { "Content-Type": "application/json" }
-    // }).then(async (rsp) => console.debug('<- slack', await rsp.json()));
+    fetch(data.response_url, {
+      method: 'POST',
+      body: JSON.stringify({
+        "replace_original": "true",
+        text: `Pooled issue <${htmlUrl}|#${issueNumber} ${issueTitle}> assigned to <https://github.com/${data.user.username}|@${data.user.username}> ${durationStr} after creation.`
+      }),
+      headers: { "Content-Type": "application/json" }
+    }).then(async (rsp) => console.debug('<- slack', await rsp.json()));
   }).catch((e) => {
     throw new Error(e.message ? e.message : JSON.stringify(e));
   });
