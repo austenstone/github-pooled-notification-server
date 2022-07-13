@@ -64,4 +64,4 @@ jobs:
             }
         env:
           SLACK_BOT_TOKEN: '${{ secrets.SLACK_POOLED_NOTIF_TOKEN }}'
-          CHANNEL_ID: 'C03GW7Y6YKE'
+          CHANNEL_ID: '${{ secrets.CHANNEL_ID }}'
