@@ -39,7 +39,7 @@ export class GitHub {
     });
   }
 
-  async initalize(appId: string) {
+  async initialize(appId: string) {
     await this.createJwt(appId);
   
     const installationsRsp = await this.getInstallations();
