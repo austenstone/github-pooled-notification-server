@@ -7,10 +7,6 @@ const appId = '219392'; // https://github.com/apps/pooled-notifications
 
 const owner = 'austenstone';
 const repo = 'pooled-notif-test';
-const token = Deno.env.get("GITHUB_TOKEN");
-if (!token) {
-  Deno.exit(1);
-}
 
 const getReqData = async (req: Request) => {
   const text = await req.text();
