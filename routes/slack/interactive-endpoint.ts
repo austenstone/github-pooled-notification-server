@@ -26,7 +26,7 @@ export const handler = async (_req: Request, _ctx: HandlerContext): Promise<Resp
   client.issueUpdateAssignees(repoOwner, repoName, issueNumber, [data.user.username]).then(async (rsp) => {
     const rspData = await rsp.json();
     if (!rsp.ok) throw new Error(rsp.statusText + ' - ' + rspData);
-    console.log('<- github', rspData);
+    console.debug('<- github', rspData);
     const createdAt = new Date(rspData.created_at);
     const updatedAt = new Date(rspData.updated_at);
     const duration = Math.abs(updatedAt - createdAt);

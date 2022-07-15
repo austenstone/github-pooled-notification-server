@@ -48,10 +48,13 @@ export class GitHub {
     const installationsRsp = await this.getInstallations();
     if (installationsRsp.ok) {
       const installations = await installationsRsp.json();
+      console.debug('<- github', installations);
       const foundInstall = installations.find((i) => i.target_id === repoOwnerId);
       if (foundInstall) {
         await this.setInstallationId(foundInstall.id);
         await this.getAccessToken();
+      } else {
+        throw new Error('App installation not found');
       }
     }
   }
